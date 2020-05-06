@@ -6,8 +6,11 @@ from utils import *
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from mlxtend.plotting import plot_confusion_matrix
+
 def clustering_with_linear_SVM_sklearn(X_train, X_test, Y_train, Y_test):
-	
+	'''
+    Clustering with SVM using sklearn, print classification report and plot confusion matrix
+    '''
 	# SVM classification
 	classifier = LinearSVC(
 				 C = 5.0,
@@ -29,3 +32,4 @@ def clustering_with_linear_SVM_sklearn(X_train, X_test, Y_train, Y_test):
 						  show_absolute=False)
 						  # class_names=labels)
 	plt.show()
+

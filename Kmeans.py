@@ -2,6 +2,24 @@ import numpy as np
 import pandas as pd 
 from collections import defaultdict
 from utils import *
+
+class Member:
+	def __init__(self, r_d, label=None, doc_id=None):
+		self._r_d = r_d
+		self.label = label
+		self.doc_id = doc_id
+
+class Cluster:
+	def __init__(self):
+		self._centroid = None
+		self._members = []
+
+	def reset_members(self):
+		self._members = []
+
+	def add_member(self, member):
+		self._members.append(member)
+
 class Kmeans:
 	def __init__(self, num_clusters, num_word_vocab):
 		self._num_clusters = num_clusters
@@ -11,7 +29,11 @@ class Kmeans:
 		self._S = 0 #similarity
 		self._data = []
 		self._label_count = defaultdict(int)
+	
 	def load_data(self, data_path):
+		'''
+		load txt file to data, data contain all member(each member include: doc_id, label and vector to classify)
+    	'''
 		def sparse_to_dense(sparse_r_d, vocab_size):
 			r_d = [0.0 for _ in range(vocab_size)]
 			indices_tfidf = sparse_r_d.split()
@@ -35,7 +57,8 @@ class Kmeans:
 			self._label_count[label] += 1 #self._label_count chua phan bo so luong cac label
 			r_d = sparse_to_dense(sparse_r_d = features[2], vocab_size = vocab_size)
 			self._data.append(Member(r_d = r_d, label = label, doc_id = doc_id)) #self._data chua tat ca cac member(gom doc_id, label va vector tuong ung)
-		## check sum ######################
+		
+		######### check sum: check sum of label_count and len of data() ######################
 		# print(len(self._data))
 		# ch_sum = 0
 		# for i in self._label_count:
@@ -44,6 +67,9 @@ class Kmeans:
 		# print(ch_sum)
 		##################################
 	def random_init(self, seed_value):
+		'''
+		random choose centroid with seed_value: controid is a random point in data
+		'''
 		cnt = 0
 		for cluster in self._clusters:
 			cnt += 1
@@ -54,11 +80,17 @@ class Kmeans:
 			# print(cluster._centroid.shape)
 
 	def compute_similarity(self, member, centroid):
+		'''
+		similarity is 1 / (distance(Euclid) + 1e-12)
+		'''
 		# khoang cach cang nho thi similarity cang lon
 		distance = np.sum((np.array(member._r_d) - np.array(centroid)) ** 2)
 		return 1. / (distance + 1e-12)
 
 	def select_cluster_for(self, member):
+		'''
+		find cluster for a member(the most similar one)
+		'''
 		best_fit_cluster = None
 		max_similarity = -1
 		for cluster in self._clusters:
@@ -72,6 +104,9 @@ class Kmeans:
 		return max_similarity
 
 	def update_centroid_of(self, cluster):
+		'''
+		update centroid of cluster
+		'''
 		member_list = [member._r_d for member in cluster._members] # chua cac vector cua cac member
 		aver_r_d = np.mean(member_list ,axis = 0)
 		tmp = np.sqrt(np.sum(aver_r_d ** 2))
@@ -80,6 +115,12 @@ class Kmeans:
 		cluster._centroid = new_centroid
 
 	def stopping_condition(self, criterion, threshold):
+		'''
+		choose stop condition:
+		similarity: stop when similarity between centroid and member of corresponding cluster is smaller than threshold
+		max_iter: stop after max_iter iteration
+		centroid: stop if the number of centroid update is smaller than threshold
+		'''
 		criteria = ['centroid', 'similarity', 'max_iter']
 		assert criterion in criteria
 		if criterion == 'max_iter':
@@ -105,6 +146,9 @@ class Kmeans:
 				return False
 
 	def run(self, seed_value, criterion, threshold):
+		'''
+		run the process of Kmean
+		'''	
 		self.random_init(seed_value)
 		self._iterration = 0
 		while True:
@@ -123,6 +167,9 @@ class Kmeans:
 			print(str(self._iterration) + ' iteration')
 
 	def compute_purity(self):
+		'''
+		compute the purity of cluster
+		'''
 		majority_sum = 0
 		for cluster in self._clusters:
 			member_labels = [member.label for member in cluster._members]
@@ -132,6 +179,9 @@ class Kmeans:
 
 
 	def compute_NMI(self):
+		''' 
+		compute NMI of cluster
+		'''
 		I_value, H_C, H_omega, N = 0.0, 0.0, 0.0, len(self._data)
 		for cluster in self._clusters:
 			wk = len(cluster._members) * 1.

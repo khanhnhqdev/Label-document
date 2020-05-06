@@ -5,7 +5,7 @@ from utils import *
 from SVM import *
 from Kmeans import *
 
-Test select_cluster
+# Test select_cluster
 member1 = Member(label = 1, doc_id = 1, r_d = [1,0])
 member2 = Member(label = 1, doc_id = 1, r_d = [0,0])
 member3 = Member(label = 1, doc_id = 1, r_d = [0,1])

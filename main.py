@@ -1,3 +1,7 @@
+# SVM: data loaded from sparse matrix saved in npz file
+# Kmean: data loaded from text file saved from session 1
+
+
 import numpy as np 
 import pandas as pd 
 from scipy.sparse import coo_matrix
@@ -5,7 +9,7 @@ from utils import *
 from SVM import *
 from Kmeans import *
 
-############################# SVM ############################################ hello
+############################# SVM ############################################ 
 # Load data
 
 X_train, Y_train = scipy.sparse.load_npz('./data_set/X_train.npz'), np.load('./data_set/Y_train.npy')
@@ -37,6 +41,9 @@ Kmean.load_data('./data_set/train_tf_idf.txt')
 max_purity = -1
 max_NMI = -1
 choose_seed = 0
+
+# Run and choose the best seed
+
 for i in range(10):
 	Kmean.run(seed_value = i + 1, criterion = 'centroid', threshold = 0)
 	print(Kmean.compute_purity())
